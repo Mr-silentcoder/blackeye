@@ -22,6 +22,9 @@ Usage of BlackEye for attacking targets without prior mutual consent is illegal.
 
 ### Usage:
 ```
+install ngrok
+mv ngrok to /usr/local/bin
+
 git clone https://github.com/thelinuxchoice/blackeye
 cd blackeye
 bash blackeye.sh
