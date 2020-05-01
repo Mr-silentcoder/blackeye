@@ -1,5 +1,5 @@
 <?php
-require_once "mobile.php";
+require_once "mobilename.php";
 
 if (!empty($_SERVER['HTTP_CLIENT_IP']))
     {
